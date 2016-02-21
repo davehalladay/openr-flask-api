@@ -7,7 +7,7 @@ Base = declarative_base()
 class Activity(Base):
     __tablename__ = "activity"
 
-    id = Column(Integer)
+    id = Column(Integer, primary_key=True)
     created_at = Column(DateTime)
     description = Column(String)
     assoc_user = Column(Integer)
