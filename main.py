@@ -1,18 +1,24 @@
 from flask import Flask
-from flask_restful import Api, Resource
-from io import IOController
+from flask_restful import Api, Resource, reqparse
+# from io import IOController
+import database
 
 app = Flask(__name__)
 api = Api(app)
-controller = IOController()
+# controller = IOController()
 
+user_parser = reqparse.RequestParser()
+user_parser.add_argument("name", required=True, help="User name is required")
+user_parser.add_argument("email")
+user_parser.add_argument("password", required=True, help="Password is required")
+user_parser.add_argument("is_admin")
 
 class Openr(Resource):
     def get(self):
-        return {"is_door_open": controller.get_door_position()}
+        return {"is_door_open": True}
 
     def post(self):
-        controller.trigger_door()
+        # controller.trigger_door()
         return {"triggered_status": True}
 
 
@@ -21,12 +27,16 @@ class User(Resource):
         return {"user": id}
 
     def put(self, id):
+        args = user_parser.parse_args()
+
         return {"user": id}
 
 
 class CreateUser(Resource):
     def post(self):
-        return {"user": True}, 201
+        args = user_parser.parse_args()
+        return {"user": database.create_user(args["name"], args["password"], is_admin=args.get("is_admin"),
+                                             email=args.get("email"))}, 201
 
 
 class ListUsers(Resource):

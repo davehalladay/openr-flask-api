@@ -1,10 +1,14 @@
 aniso8601==1.1.0
+bcrypt==2.0.0
+cffi==1.5.2
 Flask==0.10.1
 Flask-RESTful==0.3.5
 itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
 pifaceio==1.24
+psycopg2==2.6.1
+pycparser==2.14
 python-dateutil==2.4.2
 pytz==2015.7
 six==1.10.0

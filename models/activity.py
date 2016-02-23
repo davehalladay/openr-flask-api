@@ -1,19 +1,17 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
-Base = declarative_base()
+from . import base
+Base = base.Base
 
 
 class Activity(Base):
     __tablename__ = "activity"
 
     id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime)
+    created_at = Column(DateTime, default=func.now())
     description = Column(String)
-    assoc_user = Column(Integer, ForeignKey('user.id'))
-
-    user = relationship("User", back_populates="activity")
+    assoc_user = Column(Integer, ForeignKey('users.id'))
 
     def __repr__(self):
         return "<Activity(User='%s', Description='%s')>" % (self.assoc_user, self.description)

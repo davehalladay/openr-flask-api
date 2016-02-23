@@ -1,22 +1,24 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
-Base = declarative_base()
+from . import base
+
+Base = base.Base
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String, nullable=False)
     email = Column(String)
     pw_hashed = Column(String)
-    salt = Column(String)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now())
+    is_admin = Column(Boolean)
 
-    activity = relationship("Activity", back_populates="user")
+    activity = relationship("Activity", backref="users")
 
     def __repr__(self):
         return "<User(name='%s', email='%s')>" % (self.name, self.email)
