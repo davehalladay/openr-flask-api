@@ -71,6 +71,22 @@ def delete_user(id):
     return True
 
 
+def get_users(search=None):
+    pass
+
+
+def verify_password(user_name, password):
+    try:
+        user = session.query(User).filter(User.name == user_name).one()
+    except (MultipleResultsFound, NoResultFound):
+        return False
+    print(repr(user.pw_hashed))
+    print(repr(password))
+    if bcrypt.hashpw(password.encode('utf-8'), user.pw_hashed) == user.pw_hashed:
+        return True
+    return False
+
+
 def log_activity(user_id, activity_desc):
     session = Session()
     activity = Activity(assoc_user=user_id, description=activity_desc)

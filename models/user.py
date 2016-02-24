@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Binary
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -15,7 +15,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     email = Column(String)
-    pw_hashed = Column(String)
+    pw_hashed = Column(Binary)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     is_admin = Column(Boolean)

@@ -1,23 +1,33 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
+from flask_httpauth import HTTPBasicAuth
 # from io import IOController
 import database
 
 app = Flask(__name__)
 api = Api(app)
+auth = HTTPBasicAuth()
 # controller = IOController()
 
 
+@auth.verify_password
+def verify_password(user_name, password):
+    return database.verify_password(user_name, password)
+
+
 class Openr(Resource):
+    @auth.login_required
     def get(self):
         return {"is_door_open": True}
 
+    @auth.login_required
     def post(self):
         # controller.trigger_door()
         return {"triggered_status": True}
 
 
 class User(Resource):
+    @auth.login_required
     def get(self, id):
         user = database.get_user(id)
         if user:
@@ -31,6 +41,7 @@ class User(Resource):
         else:
             return dict(error="User not found"), 404
 
+    @auth.login_required
     def put(self, id):
         user_parser = reqparse.RequestParser()
         user_parser.add_argument("name")
@@ -40,11 +51,13 @@ class User(Resource):
         args = user_parser.parse_args()
         return {"success": database.update_user(id, **args)}
 
+    @auth.login_required
     def delete(self, id):
         return database.delete_user(id), 204
 
 
 class CreateUser(Resource):
+    @auth.login_required
     def post(self):
         user_parser = reqparse.RequestParser()
         user_parser.add_argument("name", required=True, help="User name is required")
@@ -57,6 +70,7 @@ class CreateUser(Resource):
 
 
 class ListUsers(Resource):
+    @auth.login_required
     def get(self):
         return ["user"]
 
