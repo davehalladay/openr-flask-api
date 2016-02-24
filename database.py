@@ -1,9 +1,9 @@
 import os
-import time
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 import bcrypt
 
 from models.base import Base
@@ -22,10 +22,10 @@ database = {
 engine = create_engine(URL(**database))
 Base.metadata.create_all(engine, checkfirst=True)
 Session = sessionmaker(bind=engine)
+session = Session()
 
 
 def create_user(name, password, **kwargs):
-    session = Session()
     data = {
         "name": name,
         "email": kwargs.get("email"),
@@ -38,9 +38,42 @@ def create_user(name, password, **kwargs):
     return new_user.id
 
 
+def update_user(id, **kwargs):
+    try:
+        user = session.query(User).filter(User.id == id).one()
+    except (MultipleResultsFound, NoResultFound):
+        return False
+    if kwargs["name"]:
+        user.name = kwargs["name"]
+    if kwargs["email"]:
+        user.email = kwargs["email"]
+    if kwargs["is_admin"] is not None:
+        user.is_admin = kwargs["is_admin"]
+    if kwargs["password"]:
+        user.pw_hashed = bcrypt.hashpw(kwargs["password"].encode("utf-8"), bcrypt.gensalt())
+    session.add(user)
+    session.commit()
+    return True
+
+
+def get_user(id):
+    try:
+        user = session.query(User).filter(User.id == id).one()
+    except (MultipleResultsFound, NoResultFound):
+        return None
+    return user
+
+
+def delete_user(id):
+    user = session.query(User).filter(User.id == id).one()
+    session.delete(user)
+    session.commit()
+    return True
+
+
 def log_activity(user_id, activity_desc):
     session = Session()
-    activity = Activity(assoc_user=user_id, description=activity_desc, created_at=time.time())
+    activity = Activity(assoc_user=user_id, description=activity_desc)
     session.add(activity)
     session.commit()
     return True

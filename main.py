@@ -7,11 +7,6 @@ app = Flask(__name__)
 api = Api(app)
 # controller = IOController()
 
-user_parser = reqparse.RequestParser()
-user_parser.add_argument("name", required=True, help="User name is required")
-user_parser.add_argument("email")
-user_parser.add_argument("password", required=True, help="Password is required")
-user_parser.add_argument("is_admin")
 
 class Openr(Resource):
     def get(self):
@@ -24,16 +19,38 @@ class Openr(Resource):
 
 class User(Resource):
     def get(self, id):
-        return {"user": id}
+        user = database.get_user(id)
+        if user:
+            return {
+                "name": user.name,
+                "email": user.email,
+                "created_at": str(user.created_at),
+                "updated_at": str(user.updated_at),
+                "is_admin": user.is_admin
+            }
+        else:
+            return dict(error="User not found"), 404
 
     def put(self, id):
+        user_parser = reqparse.RequestParser()
+        user_parser.add_argument("name")
+        user_parser.add_argument("email")
+        user_parser.add_argument("password")
+        user_parser.add_argument("is_admin")
         args = user_parser.parse_args()
+        return {"success": database.update_user(id, **args)}
 
-        return {"user": id}
+    def delete(self, id):
+        return database.delete_user(id), 204
 
 
 class CreateUser(Resource):
     def post(self):
+        user_parser = reqparse.RequestParser()
+        user_parser.add_argument("name", required=True, help="User name is required")
+        user_parser.add_argument("email")
+        user_parser.add_argument("password", required=True, help="Password is required")
+        user_parser.add_argument("is_admin")
         args = user_parser.parse_args()
         return {"user": database.create_user(args["name"], args["password"], is_admin=args.get("is_admin"),
                                              email=args.get("email"))}, 201
