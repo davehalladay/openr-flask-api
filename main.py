@@ -1,13 +1,13 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
 from flask_httpauth import HTTPBasicAuth
-# from io import IOController
+from piface_io import IOController
 import database
 
 app = Flask(__name__)
 api = Api(app)
 auth = HTTPBasicAuth()
-# controller = IOController()
+controller = IOController()
 
 
 @auth.verify_password
@@ -18,11 +18,11 @@ def verify_password(user_name, password):
 class Openr(Resource):
     @auth.login_required
     def get(self):
-        return {"is_door_open": True}
+        return {"is_door_open": controller.get_door_position()}
 
     @auth.login_required
     def post(self):
-        # controller.trigger_door()
+        controller.trigger_door()
         return {"triggered_status": True}
 
 
